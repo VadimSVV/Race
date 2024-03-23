@@ -51,9 +51,14 @@
     // Позиция машины полиции
     let policeCarX = canvas.width / 2 - carWidth / 2;
     let policeCarY = 10;
+    let policeCarSpeedX = 1;
+    let policeCarSpeedY = 1;
 
     // Счетчик
     let score = 0;
+
+    // Флаг проигрыша
+    let gameOver = false;
 
     // Обработка нажатия клавиш
     const keys = {};
@@ -70,6 +75,9 @@
 
     // Функция обновления состояния игры
     function update() {
+      // Если игра окончена, прекратить обновление
+      if (gameOver) return;
+
       // Изменение позиции игрока в зависимости от нажатых клавиш
       if (keys["ArrowLeft"]) {
         playerX -= moveSpeed;
@@ -103,74 +111,63 @@
 
       // Движение машины полиции
       if (policeCarX < playerX) {
-        policeCarX += obstacleSpeed - 1;
+        policeCarX += policeCarSpeedX;
       } else if (policeCarX > playerX) {
-        policeCarX -= obstacleSpeed - 1;
+        policeCarX -= policeCarSpeedX;
+        }
+      if (policeCarY < playerY) {
+        policeCarY += policeCarSpeedY;
+      } else if (policeCarY > playerY) {
+        policeCarY -= policeCarSpeedY;
       }
 
-      // Проверка на столкновение игрока с препятствием или машиной полиции
+      // Проверка на столкновение игрока с препятствием
       if (
-        (playerY < obstacleY + obstacleHeight &&
-        playerY + carHeight > obstacleY &&
         playerX < obstacleX + obstacleWidth &&
-        playerX + carWidth > obstacleX) ||
-        (playerY < policeCarY + carHeight &&
-        playerY + carHeight > policeCarY &&
+        playerX + carWidth > obstacleX &&
+        playerY < obstacleY + obstacleHeight &&
+        playerY + carHeight > obstacleY
+      ) {
+        gameOver = true;
+        alert("Гонщики не гонят! Гонщики гоняют, но не загоняются! Двигатель заглох!");
+      }
+
+      // Проверка на столкновение игрока с машиной полиции
+      if (
         playerX < policeCarX + carWidth &&
-        playerX + carWidth > policeCarX)
-) {
-        alert("Game Over! Your score: " + score);
-        resetGame();
+        playerX + carWidth > policeCarX &&
+        playerY < policeCarY + carHeight &&
+        playerY + carHeight > policeCarY
+      ) {
+        gameOver = true;
+        alert("Гонщики не гонят! Гонщики гоняют, но не загоняются! Двигатель заглох!");
       }
 
       // Проверка на прохождение препятствия
       if (obstacleY > canvas.height) {
-        score += obstacleScore; // Увеличиваем счет
         obstacleX = Math.random() * (canvas.width - obstacleWidth);
         obstacleY = -obstacleHeight;
+        score += obstacleScore;
       }
-    }
 
-    // Функция отрисовки игровых объектов
-    function render() {
-      // Отрисовка фона
+      // Отрисовка игровых объектов
+      context.clearRect(0, 0, canvas.width, canvas.height);
       context.drawImage(roadImage, 0, 0, canvas.width, canvas.height);
-
-      // Отрисовка игрока
       context.drawImage(carImage, playerX, playerY, carWidth, carHeight);
-
-      // Отрисовка препятствия
       context.drawImage(obstacleImage, obstacleX, obstacleY, obstacleWidth, obstacleHeight);
-
-      // Отрисовка машины полиции
       context.drawImage(policeCarImage, policeCarX, policeCarY, carWidth, carHeight);
 
-      // Отрисовка счета
-      context.font = "20px Arial";
+      // Отображение счета
       context.fillStyle = "white";
-      context.fillText("Score: " + score, 10, 30);
-    }
+      context.font = "20px Arial";
+      context.fillText("Счет: " + score, 10, 30);
 
-    // Функция игрового цикла
-    function gameLoop() {
-      update();
-      render();
-      requestAnimationFrame(gameLoop);
-    }
-
-    // Функция сброса игры
-    function resetGame() {
-      playerX = canvas.width / 2 - carWidth / 2;
-      playerY = canvas.height - carHeight - 10;
-      obstacleX = Math.random() * (canvas.width - obstacleWidth);
-      obstacleY = -obstacleHeight;
-      policeCarX = canvas.width / 2 - carWidth / 2;
-      policeCarY = 10;
-      score = 0; // Сброс счетчика
+      // Рекурсивный вызов функции обновления состояния игры
+      requestAnimationFrame(update);
     }
 
     // Запуск игры
-    gameLoop();
+    update();
   </script>
 </body>
 </html>
