@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+    #gameCanvas {
+      border: 1px solid black;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+  <script>
+    // Получение элемента холста
+    const canvas = document.getElementById("gameCanvas");
+    const context = canvas.getContext("2d");
+
+    // Создание изображения машины
+    const carImage = new Image();
+    carImage.src = "images/car.png"; // Путь к изображению машины
+
+    // Создание изображения фона
+    const roadImage = new Image();
+    roadImage.src = "images/road.png"; // Путь к изображению фона
+
+    // Создание изображения препятствия
+    const obstacleImage = new Image();
+    obstacleImage.src = "images/car2.png"; // Путь к изображению препятствия
+
+    // Параметры игры
+    const carWidth = 50;
+    const carHeight = 80;
+    const moveSpeed = 5;
+    const obstacleWidth = 50;
+    const obstacleHeight = 100;
+    const obstacleSpeed = 3;
+    const obstacleScore = 17; // Счет за каждое пройденное препятствие
+
+    // Позиция игрока
+    let playerX = canvas.width / 2 - carWidth / 2;
+    let playerY = canvas.height - carHeight - 10;
+
+    // Позиция препятствия
+    let obstacleX = Math.random() * (canvas.width - obstacleWidth);
+    let obstacleY = -obstacleHeight;
+
+    // Счетчик
+    let score = 0;
+
+    // Обработка нажатия клавиш
+    const keys = {};
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keyup", handleKeyUp);
+
+    function handleKeyDown(event) {
+      keys[event.key] = true;
+    }
+
+    function handleKeyUp(event) {
+      keys[event.key] = false;
+    }
+
+    // Функция обновления состояния игры
+    function update() {
+      // Изменение позиции игрока в зависимости от нажатых клавиш
+      if (keys["ArrowLeft"]) {
+        playerX -= moveSpeed;
+      }
+      if (keys["ArrowRight"]) {
+        playerX += moveSpeed;
+      }
+      if (keys["ArrowUp"]) {
+        playerY -= moveSpeed;
+      }
+      if (keys["ArrowDown"]) {
+        playerY += moveSpeed;
+      }
+
+      // Проверка на выход игрока за границы холста
+      if (playerX < 0) {
+        playerX = 0;
+      }
+      if (playerX > canvas.width - carWidth) {
+        playerX = canvas.width - carWidth;
+      }
+      if (playerY < 0) {
+        playerY = 0;
+      }
+      if (playerY > canvas.height - carHeight) {
+        playerY = canvas.height - carHeight;
+      }
+
+      // Движение препятствия
+      obstacleY += obstacleSpeed;
+
+      // Проверка на столкновение игрока с препятствием
+      if (
+        playerY < obstacleY + obstacleHeight &&
+        playerY + carHeight > obstacleY &&
+        playerX < obstacleX + obstacleWidth &&
+        playerX + carWidth > obstacleX
+      ) {
+        alert("Game Over! Your score: " + score);
+        resetGame();
+      }
+
+      // Проверка на прохождение препятствия
+      if (obstacleY > canvas.height) {
+        score += obstacleScore; // Увеличиваем счет
+        obstacleX = Math.random() * (canvas.width - obstacleWidth);
+        obstacleY = -obstacleHeight;
+      }
+    }
+
+    // Функция отрисовки игровых объектов
+    function render() {
+      // Отрисовка фона
+      context.drawImage(roadImage, 0, 0, canvas.width, canvas.height);
+
+      // Отрисовка игрока
+      context.drawImage(carImage, playerX, playerY, carWidth, carHeight);
+
+      // Отрисовка препятствия
+      context.drawImage(obstacleImage, obstacleX, obstacleY, obstacleWidth, obstacleHeight);
+
+      // Отрисовка счета
+      context.font = "20px Arial";
+      context.fillStyle = "white";
+      context.fillText("Score: " + score, 10, 30);
+    }
+
+    // Функция игрового цикла
+    function gameLoop() {
+      update();
+      render();
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Функция сброса игры
+    function resetGame() {
+      playerX = canvas.width / 2 - carWidth / 2;
+      playerY = canvas.height - carHeight - 10;
+      obstacleX = Math.random() * (canvas.width - obstacleWidth);
+      obstacleY = -obstacleHeight;
+      score = 0; // Сброс счетчика
+    }
+
+    // Запуск игры
+    gameLoop();
+  </script>
+</body>
+</html>
