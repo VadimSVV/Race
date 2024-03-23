@@ -15,9 +15,9 @@
     const canvas = document.getElementById("gameCanvas");
     const context = canvas.getContext("2d");
 
-    // Создание изображения машины
+    // Создание изображения машины игрока
     const carImage = new Image();
-    carImage.src = "images/car.png"; // Путь к изображению машины
+    carImage.src = "images/car.png"; // Путь к изображению машины игрока
 
     // Создание изображения фона
     const roadImage = new Image();
@@ -26,6 +26,10 @@
     // Создание изображения препятствия
     const obstacleImage = new Image();
     obstacleImage.src = "images/car2.png"; // Путь к изображению препятствия
+
+    // Создание изображения машины полиции
+    const policeCarImage = new Image();
+    policeCarImage.src = "images/cop.png"; // Путь к изображению машины полиции
 
     // Параметры игры
     const carWidth = 50;
@@ -43,6 +47,10 @@
     // Позиция препятствия
     let obstacleX = Math.random() * (canvas.width - obstacleWidth);
     let obstacleY = -obstacleHeight;
+
+    // Позиция машины полиции
+    let policeCarX = canvas.width / 2 - carWidth / 2;
+    let policeCarY = 10;
 
     // Счетчик
     let score = 0;
@@ -93,13 +101,24 @@
       // Движение препятствия
       obstacleY += obstacleSpeed;
 
-      // Проверка на столкновение игрока с препятствием
+      // Движение машины полиции
+      if (policeCarX < playerX) {
+        policeCarX += obstacleSpeed - 1;
+      } else if (policeCarX > playerX) {
+        policeCarX -= obstacleSpeed - 1;
+      }
+
+      // Проверка на столкновение игрока с препятствием или машиной полиции
       if (
-        playerY < obstacleY + obstacleHeight &&
+        (playerY < obstacleY + obstacleHeight &&
         playerY + carHeight > obstacleY &&
         playerX < obstacleX + obstacleWidth &&
-        playerX + carWidth > obstacleX
-      ) {
+        playerX + carWidth > obstacleX) ||
+        (playerY < policeCarY + carHeight &&
+        playerY + carHeight > policeCarY &&
+        playerX < policeCarX + carWidth &&
+        playerX + carWidth > policeCarX)
+) {
         alert("Game Over! Your score: " + score);
         resetGame();
       }
@@ -123,6 +142,9 @@
       // Отрисовка препятствия
       context.drawImage(obstacleImage, obstacleX, obstacleY, obstacleWidth, obstacleHeight);
 
+      // Отрисовка машины полиции
+      context.drawImage(policeCarImage, policeCarX, policeCarY, carWidth, carHeight);
+
       // Отрисовка счета
       context.font = "20px Arial";
       context.fillStyle = "white";
@@ -142,6 +164,8 @@
       playerY = canvas.height - carHeight - 10;
       obstacleX = Math.random() * (canvas.width - obstacleWidth);
       obstacleY = -obstacleHeight;
+      policeCarX = canvas.width / 2 - carWidth / 2;
+      policeCarY = 10;
       score = 0; // Сброс счетчика
     }
 
